@@ -115,7 +115,7 @@ Equipe Marcaton.
     msg.add_alternative(html_final, subtype='html')
 
     try:
-        with smtplib.SMTP_SSL("smtp.gmail.com", 465) as smtp:  # Altere para smtp.hostinger.com se for Hostinger
+        with smtplib.SMTP_SSL("smtp.hostinger.com", 465) as smtp:  # Altere para smtp.hostinger.com se for Hostinger
             smtp.set_debuglevel(1)
             smtp.login(SMTP_USER, SMTP_PASS)
             smtp.send_message(msg)
