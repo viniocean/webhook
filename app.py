@@ -24,6 +24,12 @@ SMTP_USER = os.getenv("SMTP_USER")
 SMTP_PASS = os.getenv("SMTP_PASS")
 FROM_NAME = os.getenv("FROM_NAME", "Marcaton")
 
+
+@app.route("/teste-log")
+def teste_log():
+    print("Rota de teste acessada!")
+    return "OK", 200
+
 # Gera chave no estilo MENSAL-XXXX-XXXX-XXXX-XXXX
 def gerar_chave_licenca(prefixo="", tamanho=16):
     caracteres = string.ascii_uppercase + string.digits
