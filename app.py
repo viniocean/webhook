@@ -169,6 +169,50 @@ def webhook_yampi():
         print(f"Erro no webhook: {e}")
         return jsonify({"erro": str(e)}), 500
 
+@app.route("/webhook-kiwify", methods=["POST"])
+def webhook_kiwify():
+    data = request.json
+    try:
+        if data.get("event") != "order.approved":
+            return jsonify({"status": "evento ignorado"}), 200
+
+        order = data["payload"]["order"]
+        email = order["customer"]["email"]
+        nome = order["customer"]["name"]
+        nome_plano = order["product"]["name"].lower()
+
+        if "mensal" in nome_plano:
+            dias = 30
+            prefixo = "MENSAL"
+        elif "semestral" in nome_plano:
+            dias = 180
+            prefixo = "SEMESTRAL"
+        elif "anual" in nome_plano:
+            dias = 365
+            prefixo = "ANUAL"
+        else:
+            return jsonify({"erro": "Plano desconhecido"}), 400
+
+        validade = (datetime.utcnow() + timedelta(days=dias)).strftime("%Y-%m-%d")
+        chave = gerar_chave_licenca(prefixo=prefixo)
+
+        db.collection("licenses").document(chave).set({
+            "email": email,
+            "validade": validade,
+            "plano": nome_plano,
+            "used": False,
+            "used_at": None
+        })
+
+        enviar_email(email, chave, nome_plano, validade, nome)
+
+        return jsonify({"status": "sucesso", "key": chave}), 200
+
+    except Exception as e:
+        print(f"Erro no webhook Kiwify: {e}")
+        return jsonify({"erro": str(e)}), 500
+
+
 @app.route("/", methods=["GET"])
 def home():
     return "Webhook do Marcaton está online!"
